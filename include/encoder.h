@@ -24,7 +24,7 @@ public:
     void IRAM_ATTR procesarIndice()
     {
         int32_t pulsos = getRawValue();
-        // Si pulsos es > 0 íbamos hacia adelante, si < 0 hacia atrás
+        // Si pulsos es > 0 íbamos hacia adelante, si < 0 hacia atrás, podemos ponerlo hasta 50 para evitar rebotes, aunque con el filtro de hardware no debería haberlos
         if (pulsos > 20)
         {
             vueltas = vueltas + 1;
