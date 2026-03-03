@@ -4,7 +4,7 @@
 #pragma once
 #include "driver/pulse_cnt.h"
 #include "driver/gpio.h"
-#include "esp_attr.h" // <--- FUNDAMENTAL para IRAM_ATTR
+#include "esp_attr.h"  // <--- FUNDAMENTAL para IRAM_ATTR
 
 class Encoder
 {
@@ -24,15 +24,10 @@ public:
     void IRAM_ATTR procesarIndice()
     {
         int32_t pulsos = getRawValue();
-        // Si pulsos es > 0 íbamos hacia adelante, si < 0 hacia atrás, podemos ponerlo hasta 50 para evitar rebotes, aunque con el filtro de hardware no debería haberlos
-        if (pulsos > 20)
-        {
+        if (pulsos > 50)
             vueltas = vueltas + 1;
-        }
-        else if (pulsos < -20)
-        {
+        else if (pulsos < -50)
             vueltas = vueltas - 1;
-        }
         clear();
     }
 

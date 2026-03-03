@@ -18,7 +18,6 @@ void IRAM_ATTR index_handler(void *arg)
 
 extern "C" void app_main()
 {
-
     // Config Index
     gpio_config_t io_conf = {};
     io_conf.intr_type = GPIO_INTR_NEGEDGE;
@@ -32,41 +31,14 @@ extern "C" void app_main()
     gpio_install_isr_service(0);
     gpio_isr_handler_add(PIN_INDEX, index_handler, (void *)&A);
 
-    // --- Configuración de Control ---
-    float objetivo_grados = 720.0;  // Ejemplo: Queremos que gire 2 vueltas exactas
-    const float margen_error = 2.0; // Margen de +/- 2 grados para detenerse
-
-    // Configuración de los pines del motor como salida (si no lo hiciste antes)
-    gpio_set_direction(PIN_MOT_A, GPIO_MODE_OUTPUT);
-    gpio_set_direction(PIN_MOT_B, GPIO_MODE_OUTPUT);
-
     while (1)
     {
         int32_t p = A.getRawValue();
         int32_t v = A.vueltas;
-        float grados_actuales = (v * 360.0f) + (p * 360.0f / 400.0f);
+        float grados_vuelta_actual = (p * 360.0f) / 400.0f;
+        float grados_totales = (v * 360.0f) + grados_vuelta_actual;
 
-        // --- LÓGICA DE CONTROL ---
-        if (grados_actuales < (objetivo_grados - margen_error))
-        {
-            // El motor está por detrás de la meta -> Mover adelante
-            gpio_set_level(PIN_MOT_A, 1);
-            gpio_set_level(PIN_MOT_B, 0);
-        }
-        else if (grados_actuales > (objetivo_grados + margen_error))
-        {
-            // El motor se pasó de la meta -> Mover atrás
-            gpio_set_level(PIN_MOT_A, 0);
-            gpio_set_level(PIN_MOT_B, 1);
-        }
-        else
-        {
-            // Estamos en el objetivo -> Frenar motor
-            gpio_set_level(PIN_MOT_A, 0);
-            gpio_set_level(PIN_MOT_B, 0);
-
-            printf("Vueltas: %ld | Pulsos: %ld | Total: %.2f deg\n", v, p, grados_actuales);
-            vTaskDelay(pdMS_TO_TICKS(100));
-        }
+        printf("Vueltas: %ld | Pulsos: %ld | Total: %.2f grados\n", v, p, grados_totales);
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
